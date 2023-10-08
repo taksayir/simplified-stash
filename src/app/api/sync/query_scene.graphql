@@ -1,0 +1,18 @@
+query FindSceneByFingerprint {
+    findSceneByFingerprint(
+        fingerprint: { hash: "d06d38d2c83d3a6d", algorithm: PHASH }
+    ) {
+        id
+        deleted
+        created
+        updated
+        images {
+            id
+            url
+            width
+            height
+        }
+        title
+        details
+    }
+}

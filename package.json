@@ -6,25 +6,35 @@
     "dev": "next dev -p 8999",
     "build": "next build",
     "start": "next start -p 8999",
-    "lint": "next lint"
+    "lint": "next lint",
+    "compile": "graphql-codegen",
+    "watch": "graphql-codegen -w"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.5",
     "@types/crypto-js": "^4.1.2",
+    "better-sqlite3": "^8.7.0",
     "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
-    "knex": "^2.5.1",
+    "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
+    "knex": "^3.0.1",
     "next": "13.5.4",
     "react": "^18",
     "react-dom": "^18",
     "sass": "^1.68.0",
+    "sharp": "^0.32.6",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "13.5.4",
-    "typescript": "^5"
+    "typescript": "^5.2.2"
   }
 }
