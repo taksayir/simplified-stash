@@ -8,17 +8,37 @@ type ResponseData = {
   message: string
 }
 
-function decimalToUnsignedHexSignedTwosComplement(decimal: number, numBits: number): string | null {
-  const maxValue = Math.pow(2, numBits - 1) - 1;
-  const minValue = -Math.pow(2, numBits - 1);
-  if (decimal < minValue || decimal > maxValue) {
-    return null; // Out of range
+function getBinary(a: string | number | bigint | boolean, nBits: string | number | bigint | boolean) {
+  [a, nBits] = [BigInt(a), BigInt(nBits)];
+
+  if ((a > 0 && a >= 2n ** (nBits - 1n)) || (a < 0 && -a > 2n ** (nBits - 1n))) {
+    throw new RangeError("overflow error");
   }
-  let hex = (decimal < 0 ? (decimal + Math.pow(2, numBits)) : decimal).toString(16);
-  while (hex.length < numBits / 4) {
-    hex = "0" + hex;
+
+  return a >= 0
+    ? a.toString(2).padStart(Number(nBits), "0")
+    : (2n ** nBits + a).toString(2);
+}
+
+function binaryStringToHexString(binaryString: string) {
+  const binaryStringLength = binaryString.length;
+  if (binaryStringLength % 4 !== 0) {
+    throw new RangeError("binaryString.length must be multiple of 4");
   }
-  return hex.toLowerCase();
+  let hexString = "";
+  for (let i = 0; i < binaryStringLength; i += 4) {
+    const fourBits = binaryString.slice(i, i + 4);
+    const hex = parseInt(fourBits, 2).toString(16);
+    hexString += hex;
+  }
+  return hexString;
+}
+
+function convertDecimal(bigIntStr: string) {
+  const binaryStr = getBinary(bigIntStr, 64)
+  const hexStr = binaryStringToHexString(binaryStr);
+  console.log(bigIntStr, hexStr)
+  return hexStr
 }
 
 function convertBlobToBase64(blob: any) {
@@ -29,9 +49,12 @@ function convertBlobToBase64(blob: any) {
 
 export async function GET() {
   const stashKnex = require('knex')({
-    client: 'sqlite3',
+    client: 'better-sqlite3',
     connection: {
-      filename: '/Users/kayasitprv/.stash/stash-go.sqlite'
+      filename: '/Users/kayasitprv/.stash/stash-go.sqlite',
+      defaultSafeIntegers: true,
+      bigNumberStrings: true,
+      supportBigNumbers: true
     }
   });
 
@@ -42,13 +65,13 @@ export async function GET() {
 
   for (let i = 0; i < allIds.length; i++) {
     const currentId = allIds[i]
+
     const fileDataArray = (await stashKnex
-      .select('files.*', 'files_fingerprints.type', 'files_fingerprints.fingerprint', 'folders.path',)
+      .select(knex.raw('CAST(fingerprint AS TEXT) AS fingerprint'), 'files.*', 'files_fingerprints.type', 'folders.path',)
       .from('files')
       .join('folders', 'files.parent_folder_id', '=', 'folders.id')
       .leftJoin('files_fingerprints', 'files.id', '=', 'files_fingerprints.file_id')
       .where('files.id', '=', currentId)).filter((x: any) => x.type == "phash")
-
     if (fileDataArray.length != 1) {
       console.log(`fileDataArray.length != 1, id: ${currentId}`)
       continue
@@ -69,9 +92,10 @@ export async function GET() {
     const sceneData = sceneDataArray[0]
     const coverBlob = sceneData.blob
 
+
     ret.push({
       path: `${fileData.path}/${fileData.basename}`,
-      phash: decimalToUnsignedHexSignedTwosComplement(fileData.fingerprint, 64),
+      phash: convertDecimal(fileData.fingerprint),
       cover_data: convertBlobToBase64(coverBlob),
     })
   }
@@ -96,7 +120,7 @@ export async function GET() {
       blob_id = inserted_blob
     }
 
-    
+
     await knex.insert({
       path: item.path,
       phash: item.phash,

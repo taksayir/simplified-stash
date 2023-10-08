@@ -1,6 +1,5 @@
 import React, { use, useEffect } from 'react';
 import styles from './VideoGallery.module.scss';
-import { getDb } from '@/database/getDb';
 import { getFiles } from '@/database/getFiles';
 import VideoGalleryItem, { VideoGalleryItemProps } from './VideoGalleryItem/VideoGalleryItem';
 
@@ -16,7 +15,6 @@ const getFileName = (path: string) => {
 
 const VideoGallery = async () => {
     const dbFiles = await getFiles();
-    console.log(dbFiles)
     return (
         <div className={styles.videoGalleryContainer}>
             <h1>Video Gallery</h1>
@@ -27,9 +25,10 @@ const VideoGallery = async () => {
                             key={index}
                             path={file.path}
                             name={getFileName(file.path)}
-                            title={null}
-                            detail={null}
+                            title={file.scene_title}
+                            detail={file.scene_detail}
                             image={file.cover_data || ''}
+                            phash={file.phash}
                         />
                     )
                 })}

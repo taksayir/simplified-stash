@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "  \n  query FindSceneByFingerprint {\n      findSceneByFingerprint(\n          fingerprint: { hash: \"d06d38d2c83d3a6d\", algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n      }\n  }\n": types.FindSceneByFingerprintDocument,
+    "  \n  query FindSceneByFingerprint($hash: String!) {\n      findSceneByFingerprint(\n          fingerprint: { hash: $hash, algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n          fingerprints {\n            hash\n            algorithm\n            duration\n        }            \n      }\n  }\n": types.FindSceneByFingerprintDocument,
 };
 
 /**
@@ -33,7 +33,7 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "  \n  query FindSceneByFingerprint {\n      findSceneByFingerprint(\n          fingerprint: { hash: \"d06d38d2c83d3a6d\", algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n      }\n  }\n"): (typeof documents)["  \n  query FindSceneByFingerprint {\n      findSceneByFingerprint(\n          fingerprint: { hash: \"d06d38d2c83d3a6d\", algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n      }\n  }\n"];
+export function gql(source: "  \n  query FindSceneByFingerprint($hash: String!) {\n      findSceneByFingerprint(\n          fingerprint: { hash: $hash, algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n          fingerprints {\n            hash\n            algorithm\n            duration\n        }            \n      }\n  }\n"): (typeof documents)["  \n  query FindSceneByFingerprint($hash: String!) {\n      findSceneByFingerprint(\n          fingerprint: { hash: $hash, algorithm: PHASH }\n      ) {\n          id\n          deleted\n          created\n          updated\n          images {\n              id\n              url\n              width\n              height\n          }\n          title\n          details\n          fingerprints {\n            hash\n            algorithm\n            duration\n        }            \n      }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

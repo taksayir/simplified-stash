@@ -1245,6 +1245,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-text-truncate@^0.14.2":
+  version "0.14.2"
+  resolved "https://registry.yarnpkg.com/@types/react-text-truncate/-/react-text-truncate-0.14.2.tgz#8c5ebffd1461edb1576254f48e34cf6acbd41fa2"
+  integrity sha512-lgxq31x10ecPHLF2gqp4wPf/H8ibHQP4nESil7CijqBESfNvJvjm2fp7YTw9aJWEZxNh+GLtXA9QRgjvvVyzKA==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react@*", "@types/react@^18":
   version "18.2.24"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.24.tgz#3c7d68c02e0205a472f04abe4a0c1df35d995c05"
@@ -4402,7 +4409,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.5.7, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -4461,6 +4468,13 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-clamp-lines@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/react-clamp-lines/-/react-clamp-lines-3.0.3.tgz#e0f2e4bbfb8dc71a13c55df9093f4e86b63bae7f"
+  integrity sha512-NTPPieGp11XGxXbI0mH1mcLtdvOFUk/aDL5En3VcHUTtctILnUVNcPsB7Fe+EoL8E+mds2NIeED9JYpwJslZjQ==
+  dependencies:
+    prop-types "^15.7.2"
+
 react-dom@^18:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
@@ -4473,6 +4487,13 @@ react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-text-truncate@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/react-text-truncate/-/react-text-truncate-0.19.0.tgz#60bc5ecf29a03ebc256f31f90a2d8402176aac91"
+  integrity sha512-QxHpZABfGG0Z3WEYbRTZ+rXdZn50Zvp+sWZXgVAd7FCKAMzv/kcwctTpNmWgXDTpAoHhMjOVwmgRtX3x5yeF4w==
+  dependencies:
+    prop-types "^15.5.7"
 
 react@^18:
   version "18.2.0"
