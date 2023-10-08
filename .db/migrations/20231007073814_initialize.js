@@ -21,7 +21,9 @@ exports.up = function (knex) {
       table.increments("id").primary();
       table.string("phash").unique().notNullable();
       table.string("title");
-      table.string("detail");
+      table.string("details");
+      table.integer("cover_id").unsigned();
+      table.foreign("cover_id").references("blob.id");
       table.timestamps(true, true);
     });
 };

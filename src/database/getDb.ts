@@ -1,10 +1,12 @@
+import knex from "knex";
+
 export const getDb  = () => {
-    const knex = require('knex')({
+    const db = knex({
         client: 'better-sqlite3',
         connection: {
           filename: './.db/data.db'
         },
         useNullAsDefault: true
       });
-    return knex
+    return db
 }

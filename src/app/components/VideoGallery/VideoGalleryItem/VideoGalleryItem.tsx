@@ -6,26 +6,18 @@ export interface VideoGalleryItemProps {
     path: string;
     name: string;
     title: string;
-    detail: string;
+    details: string;
     image: string;
     phash: string;
 }
 
-const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ phash, title, detail, name, image }) => {
+const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ phash, title, details, name, image }) => {
     const getBase64Image = (base64str: string) => {
         return `data:image/jpg;base64,${base64str}`;
     }
-    const sync = () => {
-        fetch(`/api/sync?phash=${phash}`).then(res => res.json()).then(res => {
-            console.log(res);
-            alert('synced')
-        }).catch(err => {
-            console.log(err);
-            alert('error')
-        })
-    }
+
     return (
-        <div className={styles.videoGalleryItem} onClick={() => sync()}>
+        <div className={styles.videoGalleryItem}>
             <div className={styles.videoImageCover}>
                 <img src={getBase64Image(image)} />
             </div>
@@ -33,7 +25,7 @@ const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ phash, title, detai
                 {title || name}
             </div>
             <div className={styles.videoDetail}>
-                {detail}
+                {details}
             </div>
         </div>
     );
