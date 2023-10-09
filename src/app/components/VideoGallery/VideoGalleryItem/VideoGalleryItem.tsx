@@ -9,9 +9,10 @@ export interface VideoGalleryItemProps {
     details: string;
     image: string;
     phash: string;
+    isLoading: boolean;
 }
 
-const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ phash, title, details, name, image }) => {
+const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ isLoading, title, details, name, image }) => {
     const getBase64Image = (base64str: string) => {
         return `data:image/jpg;base64,${base64str}`;
     }
@@ -20,6 +21,12 @@ const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ phash, title, detai
         <div className={styles.videoGalleryItem}>
             <div className={styles.videoImageCover}>
                 <img src={getBase64Image(image)} />
+                {isLoading &&
+                    <div className={styles.loaderContainer}>
+                        <div className={styles.loader}></div>
+                    </div>
+                }
+
             </div>
             <div className={styles.videoTitle}>
                 {title || name}

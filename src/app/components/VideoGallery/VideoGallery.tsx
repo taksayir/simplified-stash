@@ -16,6 +16,7 @@ const getFileName = (path: string) => {
 
 const VideoGallery = () => {
     const [dbFiles, setDbFiles] = useState<FileType[]>([]);
+    const [loadingPhash, setLoadingPhash] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,17 +33,24 @@ const VideoGallery = () => {
     const sync = async () => {
         const newDbFiles = [...dbFiles];
         for (let i = 0; i < dbFiles.length; i++) {
-            const file = dbFiles[i];
-            console.log(file)
+            const file = newDbFiles[i];
             const phash = file.phash;
+            setLoadingPhash(phash);
             const res = await fetch(`/api/sync?phash=${phash}`);
             const json = await res.json();
             const data: FileType = json.data;
-            console.log(data)
-            const index = newDbFiles.findIndex((file) => file.phash === data.phash);
-            newDbFiles[index] = data;
+            if (data?.phash) {
+                setDbFiles(prevDbFiles => {
+                    const newDbFiles = [...prevDbFiles];
+                    const index = newDbFiles.findIndex((file) => file.phash === data.phash);
+                    if (index !== -1) {
+                        newDbFiles[index] = data;
+                    }
+                    return newDbFiles;
+                });
+            }
         }
-        setDbFiles(newDbFiles);
+        setLoadingPhash(null);
 
     }
     return (
@@ -53,13 +61,14 @@ const VideoGallery = () => {
                 {dbFiles.map((file, index) => {
                     return (
                         <VideoGalleryItem
-                            key={index}
+                            key={`${index}-${file.scene_title}`}
                             path={file.path}
                             name={getFileName(file.path)}
                             title={file.scene_title}
                             details={file.scene_details}
                             image={file.scene_cover_data || file.cover_data || ''}
                             phash={file.phash}
+                            isLoading={loadingPhash === file.phash}
                         />
                     )
                 })}

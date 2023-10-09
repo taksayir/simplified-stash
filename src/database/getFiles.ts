@@ -26,8 +26,5 @@ export const getFiles = async (limit: number = 10, phash: string | null = null):
                 builder.where('files.phash', '=', phash)
             }
         })
-        
-
-    console.log(data)
     return data;
 }
