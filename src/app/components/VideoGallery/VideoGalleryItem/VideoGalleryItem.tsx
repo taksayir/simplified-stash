@@ -7,7 +7,7 @@ export interface VideoGalleryItemProps {
     name: string;
     title: string;
     details: string;
-    image: string;
+    image: number | null;
     phash: string;
     isLoading: boolean;
 }
@@ -20,7 +20,7 @@ const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ isLoading, title, d
     return (
         <div className={styles.videoGalleryItem}>
             <div className={styles.videoImageCover}>
-                <img src={getBase64Image(image)} />
+                <img src={`/api/getBlob/${image}`} />
                 {isLoading &&
                     <div className={styles.loaderContainer}>
                         <div className={styles.loader}></div>
