@@ -52,6 +52,34 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;  
         overflow: hidden;
-
+    }
+    .videoPerformerContainer {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        .videoPerformer {
+            display: flex;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #eee;
+            font-size: 0.9rem;
+            color: #333;
+            gap: 0.25rem;
+            .videoPerformerImage {
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 50%;
+                overflow: hidden;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+            .videoPerformerName {
+                font-weight: 700;
+            }
+        }
     }
 }

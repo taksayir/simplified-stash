@@ -14,6 +14,7 @@ import { downloadImageToBlob } from './utils';
 type ResponseData = {
   message: string
 }
+type DatabaseAction = 'UPDATE' | 'INSERT'
 
 const GET_SCENE_BY_FINGERPRINT = gql(/* GraphQL */ `  
   query FindSceneByFingerprint($hash: String!) {
@@ -53,6 +54,7 @@ const GET_SCENE_BY_FINGERPRINT = gql(/* GraphQL */ `
                 accuracy
             }
             images {
+                id
                 url
             }
           }
@@ -66,6 +68,11 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const phash = searchParams.get('phash')
   const client = createApolloClient()
+  const knex = getDb()
+
+  const syncOlderThan = new Date();
+  syncOlderThan.setDate(syncOlderThan.getDate() - 1);
+
   const { data } = await client.query({
     query: GET_SCENE_BY_FINGERPRINT,
     variables: {
@@ -73,65 +80,98 @@ export async function GET(request: Request) {
     }
   })
 
-  if (data?.findSceneByFingerprint.length < 1) {
-    return Response.json({ data: null })
-  }
+  const existingScene = await knex.select().from('scenes').where('phash', '=', phash)
+  const sceneDatabaseAction: DatabaseAction = existingScene.length > 0 ? 'UPDATE' : 'INSERT'
 
-  const firstMatch = data.findSceneByFingerprint[0]
-  const knex = getDb()
-  const hash = firstMatch.fingerprints.filter((x: any) => x.algorithm == "PHASH")[0].hash
-  const existingRecord = await knex.select().from('scenes').where('phash', '=', hash)
-
-
-  const image = firstMatch.images[0]
-  const cover_id = image ? await downloadImageToBlob(image.url, knex) : null
-  let scene_id = null
-  if (existingRecord.length > 0) {
-    await knex.update({
-      phash: firstMatch.fingerprints.filter((x: any) => x.algorithm == "PHASH")[0].hash,
-      title: firstMatch.title,
-      details: firstMatch.details,
-      cover_id: cover_id,
-    }).where('id', '=', existingRecord[0].id).into('scenes')
-    scene_id = existingRecord[0].id
-  } else {
-    const inserted_scene = await knex.insert({
-      phash: firstMatch.fingerprints.filter((x: any) => x.algorithm == "PHASH")[0].hash,
-      title: firstMatch.title,
-      details: firstMatch.details,
-      cover_id: cover_id,
-    }).into('scenes')
-    scene_id = inserted_scene[0]
-  }
-
-
-  console.log(firstMatch.performers)
-
-  for (let performer of firstMatch.performers) {
-    let existingPerformer = await knex.select().from('performers').where('id', '=', performer.performer.id)
-    let performer_id = null
-    if (existingPerformer.length == 0) {
-      const performerImage = performer.performer.images[0]
-      const performerCoverId = performerImage ? await downloadImageToBlob(performerImage.url, knex) : null
-      const insertedPerformer = await knex.insert({
-        name: performer.performer.name,
-        gender: performer.performer.gender,
-        birth_year: new Date(performer.performer.birthdate?.date).getFullYear(),
-        country: performer.performer.country,
-        cover_id: performerCoverId,
-      }).into('performers')
-      performer_id = insertedPerformer[0]
-    } else {
-      performer_id = existingPerformer[0].id
+  const hasSceneData = data?.findSceneByFingerprint.length > 0
+  if (hasSceneData) {
+    const sceneData = data.findSceneByFingerprint[0]
+    const hasSceneImage = sceneData.images.length > 0
+    let sceneImageId = null
+    if (hasSceneImage) {
+      const sceneImage = sceneData.images[0]
+      sceneImageId = await downloadImageToBlob(sceneImage.url, knex, sceneImage.id)
     }
-    await knex.insert({
-      scene_id: scene_id,
-      performer_id: performer_id
-    }).into('scene_performers')
+
+    let sceneId = null
+    if (sceneDatabaseAction == 'UPDATE') {
+      sceneId = existingScene[0].id
+      const shouldUpdate = existingScene[0].last_sync_at < syncOlderThan
+      if (shouldUpdate) {
+        await knex.update({
+          title: sceneData.title,
+          details: sceneData.details,
+          cover_id: sceneImageId,
+          stash_id: sceneData.id,
+          last_sync_at: knex.fn.now(),
+        }).where('id', '=', sceneId).into('scenes')
+      }
+    } else {
+      sceneId = (await knex.insert({
+        phash: phash,
+        title: sceneData.title,
+        details: sceneData.details,
+        cover_id: sceneImageId,
+        stash_id: sceneData.id,
+        last_sync_at: knex.fn.now(),
+      }).into('scenes'))[0]
+    }
+
+    const hasPerformers = sceneData.performers.length > 0
+    if (hasPerformers) {
+      for (let i = 0; i < sceneData.performers.length; i++) {
+        const performer = sceneData.performers[i]
+        const existingPerf = await knex.select().from('performers').where('stash_id', '=', performer.performer.id)
+        const perfDatabaseAction: DatabaseAction = existingPerf.length > 0 ? 'UPDATE' : 'INSERT'
+        const hasPerfImage = performer.performer.images.length > 0
+        let performerImageId = null
+        if (hasPerfImage) {
+          const performerImage = performer.performer.images[0]
+          performerImageId = await downloadImageToBlob(performerImage.url, knex, performerImage.id)
+        }
+        let performerId = null
+
+        if (perfDatabaseAction == 'UPDATE') {
+          performerId = existingPerf[0].id
+          const shouldUpdate = existingPerf[0].last_sync_at < syncOlderThan
+          if (shouldUpdate) {
+            await knex.update({
+              name: performer.performer.name,
+              gender: performer.performer.gender,
+              birth_year: new Date(performer.performer.birthdate?.date).getFullYear(),
+              country: performer.performer.country,
+              cover_id: performerImageId,
+              stash_id: performer.performer.id,
+              last_sync_at: knex.fn.now(),
+            }).where('id', '=', performerId).into('performers')
+          }
+        } else {
+          performerId = (await knex.insert({
+            name: performer.performer.name,
+            gender: performer.performer.gender,
+            birth_year: new Date(performer.performer.birthdate?.date).getFullYear(),
+            country: performer.performer.country,
+            cover_id: performerImageId,
+            stash_id: performer.performer.id,
+            last_sync_at: knex.fn.now(),
+          }).into('performers'))[0]
+        }
+
+        const hasScenePerfromer = await knex.select().from('scene_performers').where('scene_id', '=', sceneId).andWhere('performer_id', '=', performerId)
+        if (hasScenePerfromer.length == 0) {
+          await knex.insert({
+            scene_id: sceneId,
+            performer_id: performerId,
+          }).into('scene_performers')
+        }
+      }
+
+    }
+
+
 
   }
-
-
-  const fileData = await getFiles(1, phash)
+  const fileData = await getFiles(100, phash)
   return Response.json({ status: 'ok', data: fileData[0] })
+
 }

@@ -72,12 +72,13 @@ const VideoGallery = () => {
                             onClick={() => syncEach(each.phash || '')}
                         >
                             <VideoGalleryItem
-                                path={each.file.path}
-                                name={getFileName(each.file.path)}
+                                path={each.path}
+                                name={getFileName(each.path)}
                                 title={each.scene.title}
                                 details={each.scene.details}
-                                image={each.scene.imageId || each.file.imageId || null}
+                                image={each.scene.imageId || each.imageId || null}
                                 phash={each.phash}
+                                performers={each.performers}
                                 isLoading={loadingPhash === each.phash}
                             />
                         </div>

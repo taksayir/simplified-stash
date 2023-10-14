@@ -1,6 +1,7 @@
 'use client'
 import React from 'react';
 import styles from './VideoGalleryItem.module.scss';
+import { StashFilePerformer } from '@/database/getFiles';
 
 export interface VideoGalleryItemProps {
     path: string;
@@ -9,14 +10,11 @@ export interface VideoGalleryItemProps {
     details: string;
     image: number | null;
     phash: string;
+    performers: StashFilePerformer[];
     isLoading: boolean;
 }
 
-const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ isLoading, title, details, name, image }) => {
-    const getBase64Image = (base64str: string) => {
-        return `data:image/jpg;base64,${base64str}`;
-    }
-
+const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ isLoading, title, details, name, image, performers }) => {
     return (
         <div className={styles.videoGalleryItem}>
             <div className={styles.videoImageCover}>
@@ -27,12 +25,24 @@ const VideoGalleryItem: React.FC<VideoGalleryItemProps> = ({ isLoading, title, d
                     </div>
                 }
 
+
             </div>
             <div className={styles.videoTitle}>
                 {title || name}
             </div>
             <div className={styles.videoDetail}>
                 {details}
+            </div>
+            <div className={styles.videoPerformerContainer}>
+                {performers.map((each, index) => {
+                    return (
+                        <div className={styles.videoPerformer} key={index}>
+                            <img className={styles.videoPerformerImage} src={`/api/getBlob/${each.imageId}`} />
+                            <div className={styles.videoPerformerName}>{each.name}</div>
+                        </div>
+                    )
+                })}
+
             </div>
         </div>
     );
