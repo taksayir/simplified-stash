@@ -39,12 +39,16 @@ export interface StashFile {
 
 export const getFiles = async (limit: number = 10, phash: string | null = null): Promise<StashFile[]> => {
     const knex = getDb();
-    const dbFiles: DbFile[] = await knex('files')
+    const fileIdList = await knex('files')
+        .select('files.id')
         .where((builder) => {
             if (phash) {
                 builder.where('files.phash', '=', phash)
             }
         })
+        .limit(phash ? 1 : limit);
+    const dbFiles: DbFile[] = await knex('files')
+        .whereIn('files.id', fileIdList.map((file) => file.id))
         .leftJoin('scenes', 'files.phash', '=', 'scenes.phash')
         .leftJoin('scene_performers', 'scenes.id', '=', 'scene_performers.scene_id')
         .leftJoin('performers', 'scene_performers.performer_id', '=', 'performers.id')
